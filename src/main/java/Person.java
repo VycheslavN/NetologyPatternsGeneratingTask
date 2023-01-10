@@ -5,7 +5,7 @@ public class Person {
     protected final String name;
     protected final String surname;
     protected String address;
-    protected int age;
+    protected OptionalInt age = OptionalInt.empty();
     //...
 
     public Person(String name, String surname) {
@@ -17,12 +17,12 @@ public class Person {
     public Person(String name, String surname, int age) {
         this.name = name;
         this.surname = surname;
-        this.age = age;
+        this.age = OptionalInt.of(age);
         //...
     }
 
     public boolean hasAge() {
-        return age >= 0;
+        return age.isPresent();
     }
 
     public boolean hasAddress() {
@@ -38,7 +38,7 @@ public class Person {
     }
 
     public OptionalInt getAge() {
-        return OptionalInt.of(age);
+        return age;
     }
 
     public String getAddress() {
@@ -51,30 +51,18 @@ public class Person {
     }
 
     public void happyBirthday() {
-        if (hasAge()) age++;
+        if (hasAge()) {
+            age = OptionalInt.of(age.getAsInt() + 1);
+        }
     }
-
-    @Override
-    public String toString() {
-        return "Person [" +
-                "name= '" + name + '\'' +
-                ", surname= '" + surname + '\'' +
-                ", age= '" + age + '\'' +
-                ", address= '" + address + '\'' +
-                ']';
-    }
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Person person = (Person) o;
-        return age == person.age && name.equals(person.name) && surname.equals(person.surname) && Objects.equals(address, person.address);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, surname);
-    }
+        @Override
+        public String toString() {
+            return String.format("%s %s [age: %s address: %s]",
+                    name,
+                    surname,
+                    (age.isPresent() ? age.getAsInt() : "unknown!"),
+                    (!address.isEmpty() ? address : "unknown!"));
+        }
 
     public PersonBuilder newChildBuilder() {
       return new PersonBuilder().setSurname(surname).setAddress(address);
